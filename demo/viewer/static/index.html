@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Kafka Parallel Consumer Dashboard</title>
+  <style>
+    .consumer {
+      border: 1px solid #ccc;
+      margin-bottom: 20px;
+      padding: 10px;
+    }
+
+    .buffer-slot {
+      width: 20px;
+      height: 20px;
+      margin: 2px;
+      display: inline-block;
+      border: 1px solid #aaa;
+    }
+
+    .pending {
+      background-color: #3498db;
+    }
+
+    /* Blue */
+    .done {
+      background-color: #2ecc71;
+    }
+
+    /* Green */
+    .empty {
+      background-color: white;
+    }
+
+    .head {
+      border-top: 3px solid red;
+    }
+
+    .tail {
+      border-bottom: 3px solid orange;
+    }
+
+    .status-line {
+      font-size: 14px;
+      margin: 5px 0;
+    }
+
+    .partition-label {
+      font-weight: bold;
+      margin-top: 6px;
+      margin-bottom: 4px;
+    }
+  </style>
+</head>
+
+<body>
+  <h2>Kafka Consumer Dashboard</h2>
+  <div id="dashboard"></div>
+
+  <script>
+    const dashboard = document.getElementById('dashboard');
+    const consumers = {};
+
+    const evtSource = new EventSource('/sse');
+
+    evtSource.onmessage = function (event) {
+      const data = JSON.parse(event.data);
+      const key = data.key;
+
+      if (!consumers[key]) {
+        const div = document.createElement('div');
+        div.id = `consumer-${key}`;
+        div.className = 'consumer';
+        dashboard.appendChild(div);
+        consumers[key] = div;
+      }
+
+      renderConsumer(consumers[key], data);
+    };
+
+    function renderConsumer(div, data) {
+      let bufferHTML = '';
+
+      for (const [partitionKey, snapshot] of Object.entries(data.buffer)) {
+        const buf = snapshot.buffer;
+        const head = snapshot.Head;
+        const tail = snapshot.Tail;
+
+        bufferHTML += `<div class="partition-label">Partition: ${partitionKey}</div><div>`;
+        bufferHTML += buf.map((val, i) => {
+          let cls = 'buffer-slot ';
+          if (val === null) cls += 'empty';
+          else if (val === 0) cls += 'pending';
+          else if (val === 1) cls += 'done';
+
+          if (i === head) cls += ' head';
+          if (i === tail) cls += ' tail';
+
+          return `<div class="${cls}"></div>`;
+        }).join('');
+        bufferHTML += `</div>`;
+      }
+
+      div.innerHTML = `
+        <h3>Consumer [${data.key}]</h3>
+        <div class="status-line">
+          Status: ${data.status} | Concurrency: ${data.max_concurrency} | Active Jobs: ${data.active_jobs} | Memory: ${data.memory_mb.toFixed(2)} MB | Message: ${data.message}
+        </div>
+        ${bufferHTML}
+      `;
+    }
+  </script>
+</body>
+
+</html>
