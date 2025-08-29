@@ -1,86 +1,72 @@
+# Parallel Kafka Consumer (Go)
 
-# Parallel Kafka Consumer
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](./LICENSE)
+A custom Kafka consumer with built-in concurrency management, written in Go.  
+This project is **not** a replacement for Kafka client libraries — instead, it builds on [franz-go](https://github.com/twmb/franz-go) to provide a safer, production-ready consumer experience.  
 
-A custom Kafka consumer with built-in concurrency support, implemented in Go. This project is not a replacement for existing Kafka client libraries — it uses [franz-go](https://github.com/twmb/franz-go) under the hood and focuses purely on robust and production-safe consumer behavior.
-
-
-> **Inspired by:** [`confluentinc/parallel-consumer`](https://github.com/confluentinc/parallel-consumer)
+Inspired by: [confluentinc/parallel-consumer](https://github.com/confluentinc/parallel-consumer)
 
 ---
 
 ## 🎥 Demo Videos
 
-### 1. Graceful Shutdown and Offset Commit Handling
+### 1. Graceful Shutdown & Offset Commit
+Demonstrates how the consumer reacts to termination signals.  
+- Stops accepting new messages.  
+- Waits until all in-flight processing is finished.  
+- Commits processed offsets before exiting.  
 
-[![Graceful Shutdown Demo](https://img.youtube.com/vi/wX18o9ZZlWU/hqdefault.jpg)](https://youtu.be/wX18o9ZZlWU)
+### 2. Group Rebalancing in Action
+Shows how partition assignments shift when consumers join or leave the group.  
+During rebalancing:  
+- New message intake is paused.  
+- Ongoing tasks complete before partitions are released.  
+- Processed offsets are committed before ownership is given up.  
+- Once reassigned, partitions resume processing.  
 
-* Demonstrates how the consumer listens to termination signals and completes all in-flight message processing before committing offsets and shutting down.
-* 📺 [Watch Video](https://youtu.be/wX18o9ZZlWU)
+⚠️ Note: Kafka’s `partition.rebalance.timeout.ms` (or `session.timeout.ms`) should be configured to allow enough time for this behavior. Future versions may allow users to choose between waiting for in-flight work or committing only completed offsets.
 
-### 2. Kafka Consumer Group Rebalancing in Action
-
-[![Rebalance Demo](https://img.youtube.com/vi/qAc_PclKNv8/hqdefault.jpg)](https://youtu.be/qAc_PclKNv8)
-
-* Shows how partitions are reassigned when another consumer joins or leaves the group, including loss and reassignment logs.
-* During rebalancing:
-
-  * The consumer stops taking new messages.
-  * Waits for all in-progress work to finish.
-  * Commits processed offsets before giving up partition ownership.
-  * After rebalance completes, newly assigned partitions resume processing.
-
-⚠️ **Caution:** Since the consumer waits for in-progress work to finish before completing the rebalance protocol, the `partition.rebalance.timeout.ms` (or `session.timeout.ms` depending on client) in Kafka should be configured accordingly to avoid unnecessary consumer eviction. In the future, this behavior may become configurable — allowing users to choose whether to wait for in-progress messages or only commit completed ones.
-
-* 📺 [Watch Video](https://youtu.be/qAc_PclKNv8)
-
-### 3. Crash Scenerio and Message Reprocessing
-
-[![Crash Scenerio Demo](https://img.youtube.com/vi/5TIeONRPiB4/hqdefault.jpg)](https://youtu.be/5TIeONRPiB4)
-
-* Simulates consumer crash and demonstrates Kafka's at-least-once guarantee by reprocessing uncommitted messages.
-* 📺 [Watch Video](https://youtu.be/5TIeONRPiB4)
-
+### 3. Crash Recovery & Message Reprocessing
+Illustrates Kafka’s **at-least-once guarantee**.  
+- When the consumer crashes, uncommitted messages are reprocessed after restart.  
 
 ---
 
 ## 🛠 Features
 
-* ⚙️ **Controlled Concurrency:** A global semaphore ensures a cap on total in-flight message processing, enabling efficient load distribution and flow control.
-* 🚦 **Graceful Shutdown:** Listens to OS signals, cancels context, and waits for all workers to finish before exit. Offset commits happen automatically after successful processing.
-* 💥 **Crash Handling:** Demonstrates recovery of uncommitted messages by relying on Kafka's at-least-once delivery semantics.
-* 🔄 **Rebalancing Visibility:** Logs partition assignment, revocation, and reassignment during consumer group rebalances.
-* 🧪 **Demo Utilities:** Includes demo producers, viewers, and a self-contained test setup under the `demo/` directory.
+- **Controlled Concurrency**: Global semaphore ensures capped in-flight processing for load balancing.  
+- **Graceful Shutdown**: Listens to OS signals, cancels context, waits for workers, and commits offsets safely.  
+- **Crash Recovery**: Relies on Kafka semantics to reprocess uncommitted messages after failures.  
+- **Rebalance Transparency**: Logs partition assignment, revocation, and reassignment.  
+- **Demo Utilities**: Includes producers, viewers, and full demo setup under `demo/`.  
 
 ---
 
-## 📁 Usage Reference
+## 📁 Usage
 
-To understand how to run and test the consumer, refer to the `demo/` folder and the [DEMO.md](./demo/DEMO.md) guide, which describes the test setup in detail.
+See the [`demo/`](./demo) folder and **DEMO.md** for step-by-step instructions on running and testing.  
 
 ---
 
-## 🚧 Future Enhancements
+## 🚧 Roadmap
 
-* Add retry and dead-letter queue (DLQ) handling logic
-* Cleanup excessive or debug logs for better clarity
-* Support idempotency using distributed cache to avoid message reprocessing on node crash
-* Ensure correct order of execution for messages with the same key
-* Expose Prometheus metrics for observability
-* Make offset commit strategy configurable
-* Decouple from franz-go: Refactor the consumer logic to be library-agnostic, enabling support for alternative Kafka clients via clean interfaces
+- Retry logic & Dead Letter Queue (DLQ) support  
+- Cleaner logs for production clarity  
+- Idempotency via distributed cache to prevent duplicate processing after crashes  
+- Preserve ordering for messages with identical keys  
+- Prometheus metrics for observability  
+- Configurable offset commit strategies  
+- Refactor to be library-agnostic, enabling multiple Kafka client backends  
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome! If you find a bug, have a suggestion, or want to extend functionality:
+Contributions are encouraged!  
 
-1. Open an issue describing the problem or enhancement.
-2. Fork the repo and create a new branch.
-3. Submit a pull request with clear description and context.
+1. Open an issue describing the bug or feature request.  
+2. Fork the repo & create a feature branch.  
+3. Submit a pull request with clear context.  
 
-For major changes, please open a discussion first.
+For large changes, please start a discussion first.  
 
-Thanks for helping improve this project!
-
+Thank you for helping make this project better!
