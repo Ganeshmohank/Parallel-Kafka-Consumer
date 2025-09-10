@@ -9,6 +9,14 @@ Inspired by: [confluentinc/parallel-consumer](https://github.com/confluentinc/pa
 
 ## 🎥 Demo Videos
 
+Watch the key feature demonstrations:
+
+-   🔄 [Rebalance Demo](https://drive.google.com/file/d/1o6VeE-CprLgHEbe2uLJNLv6sFugga7_W/view?usp=drive_link)
+    
+-   🧹 [Graceful Shutdown & Commit Order](https://drive.google.com/file/d/1UW1iuMDkMZuvPTUWk4MyqiapM1VVc0fO/view?usp=drive_link)
+    
+-   💥 [Consumer Crash & Reprocessing](https://drive.google.com/file/d/1rn3jfzK_P4RE8eNU3GFrC6L3PZM3uet7/view?usp=drive_link)
+
 ### 1. Graceful Shutdown & Offset Commit
 Demonstrates how the consumer reacts to termination signals.  
 - Stops accepting new messages.  

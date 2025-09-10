@@ -116,13 +116,13 @@ Then visit `http://localhost:8081` to see the live dashboard.
 
 ## ▶️ Demo Videos
 
-Watch the key feature demonstrations on YouTube:
+Watch the key feature demonstrations:
 
--   🔄 [Rebalance Demo](https://youtu.be/qAc_PclKNv8)
+-   🔄 [Rebalance Demo](https://drive.google.com/file/d/1o6VeE-CprLgHEbe2uLJNLv6sFugga7_W/view?usp=drive_link)
     
--   🧹 [Graceful Shutdown & Commit Order](https://youtu.be/wX18o9ZZlWU)
+-   🧹 [Graceful Shutdown & Commit Order](https://drive.google.com/file/d/1UW1iuMDkMZuvPTUWk4MyqiapM1VVc0fO/view?usp=drive_link)
     
--   💥 [Consumer Crash & Reprocessing](https://youtu.be/5TIeONRPiB4)
+-   💥 [Consumer Crash & Reprocessing](https://drive.google.com/file/d/1rn3jfzK_P4RE8eNU3GFrC6L3PZM3uet7/view?usp=drive_link)
     
 
 ----------
